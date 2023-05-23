@@ -47,8 +47,6 @@ class AMExplainer(BaseExplainer):
 
     def _loss(self, masked_pred, masked_pred_random, original_pred, masked_emb, original_emb, a, b, c):
                 
-        # ce_loss = torch.nn.functional.cross_entropy(masked_pred, original_pred)
-        # mse_1 = torch.sum((self.softmax(masked_pred)-self.softmax(original_pred))**2)
         mse_1 = torch.sum((masked_pred-original_pred)**2)
         
         uniform_dis = torch.ones_like(masked_pred_random) * (1/self.num_classes)        
@@ -56,8 +54,6 @@ class AMExplainer(BaseExplainer):
 
         mse_3 = torch.sum((masked_emb-original_emb)**2)
                 
-        print(mse_1, mse_2, mse_3)
-
         return a*mse_1 + b*mse_2 + c*mse_3, mse_1, mse_2, mse_3
         
 
@@ -82,15 +78,6 @@ class AMExplainer(BaseExplainer):
                 original_pred = self.model_to_explain(feats, graph)[index]
 
                 original_emb = self.model_to_explain.embedding(feats, graph)[index]
-                # print("embed shape")
-                # print(original_emb.shape)
-                # print(self.model_to_explain.embedding(feats, graph).shape)
-
-                # print("graph shape")
-                # print(graph.shape)
-
-                # print("feat shape")
-                # print(feats.shape)
 
                 pred_label = original_pred.argmax(dim=-1).detach()
         else:
@@ -165,15 +152,6 @@ class AMExplainer(BaseExplainer):
         if self.type == 'node':
 
             self.edge_mask = self.edge_mask.detach()
-
-            # #-----------------------------------------------------------------------------------
-            # masked_pred = self.model_to_explain(feats, graph, edge_weights=self.sigmoid_slope(self.edge_mask, curr_slope, move_distance))[index]
-            # masked_pred_random = self.model_to_explain(feats, graph, edge_weights=(1-self.sigmoid_slope(self.edge_mask, curr_slope, move_distance)))[index]
-            # #-----------------------------------------------------------------------------------
-            # print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-            # print("original prediction", original_pred, self.softmax(original_pred), "predicted label", pred_label)
-            # print("masked prediction", masked_pred.detach(), self.softmax(masked_pred.detach()))
-            # print("random prediction", masked_pred_random.detach(), self.softmax(masked_pred_random.detach()))
 
             for tmp_index in range(1, self.edge_mask.shape[0]+1):
 
